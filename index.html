@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Betsy Being Betsy">
+<title>Betsy Being Betsy</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --peach: #FDEBD0;
+    --sage: #D5E8D4;
+    --lavender: #E8D5E8;
+    --sky: #D4E6F1;
+    --rose: #F5CBA7;
+    --cream: #FFF8F0;
+    --text: #3E2723;
+    --text-light: #6D4C41;
+    --accent: #C2185B;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  header {
+    text-align: center;
+    padding: 2rem 1.5rem 1rem;
+    background: linear-gradient(135deg, var(--lavender), var(--peach));
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  header h1 .colon {
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  header .subtitle {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--text-light);
+    margin-top: 0.25rem;
+  }
+
+  .tabs {
+    display: flex;
+    background: #fff;
+    border-bottom: 1px solid #e0d6cc;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 0.85rem;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-light);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-bottom: 3px solid transparent;
+  }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  main {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Today view */
+  .today-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 180px);
+    min-height: calc(100dvh - 180px);
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+
+  .day-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), #E91E63);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.4rem 1.2rem;
+    border-radius: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .prompt-card {
+    background: #fff;
+    border-radius: 1.25rem;
+    padding: 2.5rem 2rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .prompt-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--lavender), var(--peach), var(--sage), var(--sky));
+  }
+
+  .prompt-card .flower {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .prompt-card .prompt-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .not-april {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--text-light);
+    padding: 3rem 2rem;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* Archive view */
+  .archive-view {
+    padding: 1rem 1rem 2rem;
+  }
+
+  .archive-view.hidden, .today-view.hidden {
+    display: none;
+  }
+
+  .archive-empty {
+    text-align: center;
+    padding: 3rem 2rem;
+    font-style: italic;
+    color: var(--text-light);
+    font-family: 'Playfair Display', serif;
+  }
+
+  .archive-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.25rem 1.25rem;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .archive-card:active {
+    transform: scale(0.98);
+  }
+
+  .archive-day {
+    min-width: 3rem;
+    text-align: center;
+  }
+
+  .archive-day .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .archive-day .label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-light);
+  }
+
+  .archive-prompt {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text);
+    padding-top: 0.15rem;
+  }
+
+  .archive-card.today-highlight {
+    border-left: 4px solid var(--accent);
+  }
+
+  /* Flower decorations */
+  .flowers-bottom {
+    text-align: center;
+    padding: 1rem;
+    font-size: 1.5rem;
+    letter-spacing: 0.5rem;
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Betsy Being Betsy</h1>
+  <div class="subtitle">An App for the Kindest Month</div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-tab="today">Today</button>
+  <button class="tab" data-tab="archive">Archive</button>
+</div>
+
+<main>
+  <div class="today-view" id="today-view"></div>
+  <div class="archive-view hidden" id="archive-view"></div>
+</main>
+
+<script>
+const PROMPTS = [
+  "Be a holy fool \u2014 perform a small act of kindness for a stranger.",
+  "Go for a walk on a route you\u2019ve never taken before.",
+  "Practice \u201Csukha\u201D \u2014 find one moment of ease or sweetness today.",
+  "Identify an \u201Cattack thought\u201D and tell it: \u201CYou are not real.\u201D",
+  "Notice the \u201Clinen in the tomb\u201D \u2014 signs of new life.",
+  "Compliment a stranger on their glasses or haircut.",
+  "Send a \u201Cthinking of you\u201D text to someone you haven\u2019t spoken to in a while.",
+  "Find a \u201Crumble strip\u201D in your life \u2014 what is it warning you to wake up to?",
+  "Be a \u201Ccareful walker\u201D today.",
+  "Hug yourself and whisper, \u201CYou are safe.\u201D",
+  "Eat something delicious to celebrate being alive.",
+  "Look at yourself with love, grace, and kindness.",
+  "Write a one-sentence prayer for the world.",
+  "Find one \u201Ctiny choice\u201D that affirms the good today.",
+  "Yield to the \u201Cweird mystery\u201D of the day.",
+  "Identify a \u201Csecond arrow\u201D of judgment and let it drop.",
+  "Walk at the \u201Cspeed of grace.\u201D",
+  "Waste time with God or the universe.",
+  "Notice a bird and consider what message it brings.",
+  "Let go of \u201Cwhat was\u201D to make room for \u201Cwhat is.\u201D",
+  "Be a \u201Cclarity warrior.\u201D",
+  "Practice \u201Cvisio divina\u201D \u2014 look deeply at a piece of art or nature.",
+  "Do one thing that makes your spirit \u201Cpurr.\u201D",
+  "Turn on the light for a monster under the bed.",
+  "Choose \u201Cpresence and compassion\u201D over fear or rage.",
+  "Walk away from a battle you don\u2019t need to fight.",
+  "Perform a \u201CShane lobotomy\u201D \u2014 delete an old, unhelpful narrative.",
+  "Choose a question to live into today.",
+  "Ask: \u201CHow should I love so that life will really come from it?\u201D",
+  "\u201CNorth\u201D your way forward with quiet as your companion."
+];
+
+const FLOWERS = [
+  "\uD83C\uDF38", "\uD83C\uDF3C", "\uD83C\uDF3B", "\uD83C\uDF37", "\uD83C\uDF3A",
+  "\uD83C\uDF39", "\uD83C\uDF3C", "\uD83C\uDF38", "\uD83C\uDF3B", "\uD83C\uDF37",
+  "\uD83C\uDF3A", "\uD83C\uDF39", "\uD83C\uDF38", "\uD83C\uDF3C", "\uD83C\uDF3B",
+  "\uD83C\uDF37", "\uD83C\uDF3A", "\uD83C\uDF39", "\uD83C\uDF38", "\uD83C\uDF3C",
+  "\uD83C\uDF3B", "\uD83C\uDF37", "\uD83C\uDF3A", "\uD83C\uDF39", "\uD83C\uDF38",
+  "\uD83C\uDF3C", "\uD83C\uDF3B", "\uD83C\uDF37", "\uD83C\uDF3A", "\uD83C\uDF39"
+];
+
+function getToday() {
+  const now = new Date();
+  return { month: now.getMonth(), day: now.getDate(), year: now.getFullYear() };
+}
+
+function isApril(d) {
+  return d.month === 3 && d.year === 2026;
+}
+
+function renderToday() {
+  const container = document.getElementById('today-view');
+  const d = getToday();
+
+  if (!isApril(d)) {
+    const beforeApril = d.month < 3 || (d.month === 3 && d.year < 2026) || (d.year < 2026);
+    const afterApril = d.month > 3 || d.year > 2026;
+
+    if (afterApril || (d.month === 3 && d.year > 2026)) {
+      container.innerHTML = `
+        <div class="prompt-card">
+          <div class="flower">\uD83C\uDF38</div>
+          <div class="prompt-text">April has come and gone, but its kindness lives on in you. Visit the Archive to revisit your prompts.</div>
+        </div>`;
+    } else {
+      container.innerHTML = `
+        <div class="prompt-card">
+          <div class="flower">\uD83C\uDF31</div>
+          <div class="prompt-text">The kindest month hasn\u2019t started yet! Come back on April 1st for your first prompt.</div>
+        </div>`;
+    }
+    return;
+  }
+
+  const idx = d.day - 1;
+  container.innerHTML = `
+    <div class="day-badge">April ${d.day}</div>
+    <div class="prompt-card">
+      <div class="flower">${FLOWERS[idx]}</div>
+      <div class="prompt-text">${PROMPTS[idx]}</div>
+    </div>
+  `;
+}
+
+function renderArchive() {
+  const container = document.getElementById('archive-view');
+  const d = getToday();
+
+  let maxDay = 0;
+  if (isApril(d)) {
+    maxDay = d.day;
+  } else if (d.month > 3 || d.year > 2026) {
+    maxDay = 30;
+  }
+
+  if (maxDay === 0) {
+    container.innerHTML = `<div class="archive-empty">No prompts yet. Come back in April!</div>`;
+    return;
+  }
+
+  let html = '';
+  for (let i = maxDay - 1; i >= 0; i--) {
+    const isToday = isApril(d) && (i + 1) === d.day;
+    html += `
+      <div class="archive-card ${isToday ? 'today-highlight' : ''}">
+        <div class="archive-day">
+          <div class="num">${i + 1}</div>
+          <div class="label">April</div>
+        </div>
+        <div class="archive-prompt">${PROMPTS[i]}</div>
+      </div>`;
+  }
+
+  html += `<div class="flowers-bottom">\uD83C\uDF38 \uD83C\uDF3C \uD83C\uDF3B \uD83C\uDF37 \uD83C\uDF3A</div>`;
+  container.innerHTML = html;
+}
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+
+    const target = tab.dataset.tab;
+    document.getElementById('today-view').classList.toggle('hidden', target !== 'today');
+    document.getElementById('archive-view').classList.toggle('hidden', target !== 'archive');
+
+    if (target === 'archive') renderArchive();
+  });
+});
+
+// Initial render
+renderToday();
+</script>
+</body>
+</html>
